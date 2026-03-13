@@ -85,10 +85,6 @@ ${context || '関連情報が見つかりませんでした。一般的な知識
   }
 });
 
-app.get('/', (req, res) => {
-  res.send('Brapro Chatbot is running!');
-});
-
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
