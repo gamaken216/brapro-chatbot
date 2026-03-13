@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 const OpenAI = require('openai');
+const { loadKnowledge } = require('./load-knowledge');
 
 const app = express();
 app.use(cors());
