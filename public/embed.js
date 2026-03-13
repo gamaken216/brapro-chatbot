@@ -1,6 +1,5 @@
 (function() {
-  const SERVER_URL = window.location.protocol + '//' + 
-    (window._braproServer || document.currentScript.src.split('/embed.js')[0]);
+  const SERVER_URL = 'https://brapro-chatbot.onrender.com';
 
   // スタイル追加
   const style = document.createElement('style');
