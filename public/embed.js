@@ -2,6 +2,7 @@
   const SERVER_URL = window.location.protocol + '//' + 
     (window._braproServer || document.currentScript.src.split('/embed.js')[0]);
 
+  // スタイル追加
   const style = document.createElement('style');
   style.textContent = `
     .brapro-chat-icon {
@@ -21,7 +22,9 @@
       z-index: 999999;
       transition: transform 0.2s;
     }
-    .brapro-chat-icon:hover { transform: scale(1.1); }
+    .brapro-chat-icon:hover {
+      transform: scale(1.1);
+    }
     .brapro-chat-icon .brapro-tooltip {
       position: absolute;
       right: 70px;
@@ -36,7 +39,9 @@
       pointer-events: none;
       font-family: sans-serif;
     }
-    .brapro-chat-icon:hover .brapro-tooltip { opacity: 1; }
+    .brapro-chat-icon:hover .brapro-tooltip {
+      opacity: 1;
+    }
     .brapro-chat-window {
       position: fixed;
       bottom: 100px;
@@ -52,7 +57,9 @@
       overflow: hidden;
       font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
     }
-    .brapro-chat-window.open { display: flex; }
+    .brapro-chat-window.open {
+      display: flex;
+    }
     .brapro-chat-header {
       background: linear-gradient(135deg, #2d5a27 0%, #4a7c43 100%);
       color: white;
@@ -61,8 +68,15 @@
       align-items: center;
       justify-content: space-between;
     }
-    .brapro-chat-header-title { font-size: 15px; font-weight: bold; }
-    .brapro-chat-header-sub { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+    .brapro-chat-header-title {
+      font-size: 15px;
+      font-weight: bold;
+    }
+    .brapro-chat-header-sub {
+      font-size: 11px;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
     .brapro-chat-close {
       background: none;
       border: none;
@@ -78,9 +92,17 @@
       padding: 16px;
       background: #f5f5f5;
     }
-    .brapro-message { margin-bottom: 12px; display: flex; flex-direction: column; }
-    .brapro-message.user { align-items: flex-end; }
-    .brapro-message.bot { align-items: flex-start; }
+    .brapro-message {
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+    .brapro-message.user {
+      align-items: flex-end;
+    }
+    .brapro-message.bot {
+      align-items: flex-start;
+    }
     .brapro-bubble {
       max-width: 80%;
       padding: 10px 14px;
@@ -110,7 +132,8 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     }
     .brapro-typing span {
-      width: 8px; height: 8px;
+      width: 8px;
+      height: 8px;
       background: #aaa;
       border-radius: 50%;
       animation: braPulse 1.2s infinite;
@@ -139,9 +162,12 @@
       font-family: inherit;
       max-height: 80px;
     }
-    .brapro-chat-input:focus { border-color: #4a7c43; }
+    .brapro-chat-input:focus {
+      border-color: #4a7c43;
+    }
     .brapro-chat-send {
-      width: 42px; height: 42px;
+      width: 42px;
+      height: 42px;
       background: linear-gradient(135deg, #2d5a27, #4a7c43);
       border: none;
       border-radius: 50%;
@@ -167,11 +193,13 @@
   `;
   document.head.appendChild(style);
 
+  // アイコン
   const icon = document.createElement('div');
   icon.className = 'brapro-chat-icon';
   icon.innerHTML = '🐝<span class="brapro-tooltip">お客様相談室</span>';
   document.body.appendChild(icon);
 
+  // チャットウィンドウ
   const win = document.createElement('div');
   win.className = 'brapro-chat-window';
   win.innerHTML = `
@@ -180,4 +208,90 @@
         <div class="brapro-chat-header-title">🐝 ブラプロ お客様相談室</div>
         <div class="brapro-chat-header-sub">プロポリスのことなら何でもどうぞ</div>
       </div>
-      <button class="brapro-chat-clos
+      <button class="brapro-chat-close">×</button>
+    </div>
+    <div class="brapro-chat-messages" id="braproMessages">
+      <div class="brapro-message bot">
+        <div class="brapro-bubble">こんにちは！ブラプロのお客様相談室です🐝<br>プロポリスや商品についてのご質問をどうぞ。</div>
+      </div>
+    </div>
+    <div class="brapro-chat-input-area">
+      <textarea class="brapro-chat-input" id="braproInput" placeholder="メッセージを入力..." rows="1"></textarea>
+      <button class="brapro-chat-send" id="braproSend">➤</button>
+    </div>
+  `;
+  document.body.appendChild(win);
+
+  // 開閉
+  icon.addEventListener('click', () => win.classList.toggle('open'));
+  win.querySelector('.brapro-chat-close').addEventListener('click', () => win.classList.remove('open'));
+
+  // メッセージ送信
+  const messages = win.querySelector('#braproMessages');
+  const input = win.querySelector('#braproInput');
+  const sendBtn = win.querySelector('#braproSend');
+
+  function addMessage(text, role) {
+    const msg = document.createElement('div');
+    msg.className = 'brapro-message ' + role;
+    const bubble = document.createElement('div');
+    bubble.className = 'brapro-bubble';
+    bubble.textContent = text;
+    msg.appendChild(bubble);
+    messages.appendChild(msg);
+    messages.scrollTop = messages.scrollHeight;
+    return msg;
+  }
+
+  function showTyping() {
+    const msg = document.createElement('div');
+    msg.className = 'brapro-message bot';
+    msg.id = 'braproTyping';
+    msg.innerHTML = '<div class="brapro-typing"><span></span><span></span><span></span></div>';
+    messages.appendChild(msg);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('braproTyping');
+    if (t) t.remove();
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage(text, 'user');
+    input.value = '';
+    input.style.height = 'auto';
+    sendBtn.disabled = true;
+    showTyping();
+
+    try {
+      const res = await fetch(SERVER_URL + '/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await res.json();
+      removeTyping();
+      addMessage(data.reply || 'エラーが発生しました', 'bot');
+    } catch (e) {
+      removeTyping();
+      addMessage('接続エラーが発生しました。しばらくしてから再度お試しください。', 'bot');
+    }
+    sendBtn.disabled = false;
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 80) + 'px';
+  });
+})();
