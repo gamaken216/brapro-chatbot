@@ -1,16 +1,13 @@
 const { createClient } = require('@supabase/supabase-js');
 const OpenAI = require('openai');
 const https = require('https');
-
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_KEY
 );
-
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
-
 const urls = [
   'https://www.brapro.jp/chatbot1.html',
   'https://www.brapro.jp/QandA/',
@@ -19,7 +16,6 @@ const urls = [
   'https://www.brapro.jp/product/',
   'https://www.brapro.jp/kodawari/',
 ];
-
 async function fetchPage(url) {
   return new Promise((resolve) => {
     https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
@@ -41,7 +37,6 @@ async function fetchPage(url) {
     });
   });
 }
-
 async function registerKnowledge(url, content) {
   if (!content) return;
   try {
@@ -62,7 +57,6 @@ async function registerKnowledge(url, content) {
     console.error(`Error processing ${url}:`, e.message);
   }
 }
-
 async function main() {
   console.log('ナレッジ登録を開始します...\n');
   for (const url of urls) {
@@ -78,4 +72,4 @@ async function main() {
   console.log('\n✨ 全て完了しました！');
 }
 
-main();
+module.exports = { loadKnowledge: main };
