@@ -90,6 +90,19 @@ app.get('/health', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+
+// ナレッジ登録エンドポイント
+app.get('/admin/reload', async (req, res) => {
+  try {
+    console.log('ナレッジ登録開始...');
+    await loadKnowledge();
+    res.send('ナレッジ登録完了！');
+  } catch(e) {
+    console.error('エラー:', e.message);
+    res.status(500).send('エラー: ' + e.message);
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
